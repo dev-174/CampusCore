@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 
 from core.models import Department, Batch
 from .models import StudentProfile, FacultyProfile, ParentProfile
+from .services import EnrollmentNumberError
 from .serializers import (
     StudentSerializer, FacultySerializer, ParentSerializer,
     StudentPreviewSerializer, FacultyPreviewSerializer, ParentPreviewSerializer,
@@ -57,15 +58,10 @@ class StudentViewSet(viewsets.ModelViewSet):
                 dept = user.faculty_profile.department
             except Exception:
                 return StudentProfile.objects.none()
-            qs = StudentProfile.objects.filter(university=user.university, department=dept)
+            qs = StudentProfile.objects.filter(university=user.university, department=dept, user__is_active=True)
         else:
-            qs = StudentProfile.objects.filter(university=user.university)
+            qs = StudentProfile.objects.filter(university=user.university, user__is_active=True)
 
-        # Optional ?batch=<id> filter -- used by pages (e.g. Mark Attendance,
-        # Add Marks) that need students for one specific batch only, instead
-        # of the whole department. This narrows the queryset above; it never
-        # widens it, so a faculty member still can't see students outside
-        # their own department this way.
         batch_id = self.request.query_params.get('batch')
         if batch_id:
             qs = qs.filter(batch_id=batch_id)
@@ -81,18 +77,29 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid department or batch.'}, status=400)
         if User.objects.filter(email__iexact=data['email']).exists():
             return Response({'error': 'Email already in use.'}, status=400)
+        try:
+            admission_year = int(data['admission_year'])
+        except (KeyError, TypeError, ValueError):
+            return Response({'error': 'admission_year (e.g. 2024) is required.'}, status=400)
 
-        user    = create_user(data['email'], data['name'], 'student', university)
-        profile = StudentProfile.objects.create(
-            user=user, university=university,
-            department=dept, batch=batch, roll_no=data['roll_no'],
-        )
+        # NOTE: the frontend must never send an enrollment_number -- it is
+        # always generated server-side in StudentProfile.save().
+        user = create_user(data['email'], data['name'], 'student', university)
+        try:
+            profile = StudentProfile.objects.create(
+                user=user, university=university, department=dept, batch=batch,
+                roll_no=data['roll_no'], admission_year=admission_year,
+            )
+        except EnrollmentNumberError as e:
+            user.delete()
+            return Response({'error': str(e)}, status=400)
         return Response(StudentSerializer(profile).data, status=201)
 
     def destroy(self, request, pk=None):
         profile = self.get_object()
-        profile.user.is_active = False
-        profile.user.save()
+        user = profile.user
+        profile.delete()
+        user.delete()
         return Response(status=204)
 
     @action(detail=True, methods=['get'])
@@ -106,20 +113,83 @@ class StudentViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({'error': 'No file uploaded.'}, status=400)
         university = request.user.university
-        df = pd.read_csv(file).drop_duplicates('email').dropna(subset=['name','email','department','batch','roll_no'])
+        try:
+            df = pd.read_csv(file).drop_duplicates('email').dropna(
+                subset=['name', 'email', 'department', 'batch', 'roll_no', 'admission_year']
+            )
+        except Exception as e:
+            return Response({'error': f'Failed to parse CSV file: {str(e)}'}, status=400)
+
         created, errors = [], []
         for _, row in df.iterrows():
+            email_val = str(row['email']).strip()
+            name_val  = str(row['name']).strip()
+            roll_val  = str(row['roll_no']).strip()
+            dept_val  = str(row['department']).strip()
+            batch_val = str(row['batch']).strip()
+
             try:
-                if User.objects.filter(email__iexact=row['email']).exists():
-                    errors.append({'email': row['email'], 'error': 'Email exists.'}); continue
-                dept  = Department.objects.get(name=row['department'], university=university)
-                batch = Batch.objects.get(name=row['batch'], department=dept)
-                user  = create_user(row['email'], row['name'], 'student', university)
-                StudentProfile.objects.create(user=user, university=university, department=dept, batch=batch, roll_no=row['roll_no'])
-                created.append(row['email'])
+                if User.objects.filter(email__iexact=email_val).exists():
+                    errors.append({'email': email_val, 'error': 'Email already exists.'})
+                    continue
+
+                # Department lookup by ID or name
+                dept = None
+                if dept_val.isdigit():
+                    dept = Department.objects.filter(id=int(dept_val), university=university).first()
+                if not dept:
+                    dept = Department.objects.filter(name__iexact=dept_val, university=university).first()
+                if not dept:
+                    errors.append({'email': email_val, 'error': f"Department '{dept_val}' not found."})
+                    continue
+
+                # Batch lookup by ID or name
+                batch = None
+                if batch_val.isdigit():
+                    batch = Batch.objects.filter(id=int(batch_val), department=dept).first()
+                if not batch:
+                    batch = Batch.objects.filter(name__iexact=batch_val, department=dept).first()
+                if not batch:
+                    errors.append({'email': email_val, 'error': f"Batch '{batch_val}' not found for department '{dept.name}'."})
+                    continue
+
+                try:
+                    admission_year_val = int(str(row['admission_year']).strip())
+                except (TypeError, ValueError):
+                    errors.append({'email': email_val, 'error': f"Invalid admission_year '{row['admission_year']}'."})
+                    continue
+
+                user = create_user(email_val, name_val, 'student', university)
+                try:
+                    StudentProfile.objects.create(
+                        user=user, university=university, department=dept, batch=batch,
+                        roll_no=roll_val, admission_year=admission_year_val,
+                    )
+                except EnrollmentNumberError as e:
+                    user.delete()
+                    errors.append({'email': email_val, 'error': str(e)})
+                    continue
+                created.append(email_val)
             except Exception as e:
-                errors.append({'email': row.get('email'), 'error': str(e)})
-        return Response({'created': created, 'errors': errors}, status=201)
+                errors.append({'email': email_val, 'error': str(e)})
+
+        if not created:
+            errMsg = errors[0]['error'] if errors else 'No valid student records found in file.'
+            return Response({
+                'error': f'Bulk upload failed: {errMsg}',
+                'created': created,
+                'errors': errors
+            }, status=400)
+
+        msg = f"Bulk upload completed: {len(created)} student(s) created successfully."
+        if errors:
+            msg += f" ({len(errors)} failed)."
+
+        return Response({
+            'message': msg,
+            'created': created,
+            'errors': errors
+        }, status=201)
 
 
 # ─── Faculty ──────────────────────────────────────────────────────────────────
@@ -129,7 +199,7 @@ class FacultyViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def get_queryset(self):
-        return FacultyProfile.objects.filter(university=self.request.user.university)
+        return FacultyProfile.objects.filter(university=self.request.user.university, user__is_active=True)
 
     def create(self, request):
         data       = request.data
@@ -150,8 +220,9 @@ class FacultyViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, pk=None):
         profile = self.get_object()
-        profile.user.is_active = False
-        profile.user.save()
+        user = profile.user
+        profile.delete()
+        user.delete()
         return Response(status=204)
 
     @action(detail=True, methods=['get'])
@@ -163,21 +234,59 @@ class FacultyViewSet(viewsets.ModelViewSet):
     def bulk_upload(self, request):
         file = request.FILES.get('file')
         if not file:
-            return Response({'error': 'No file.'}, status=400)
+            return Response({'error': 'No file uploaded.'}, status=400)
         university = request.user.university
-        df = pd.read_csv(file).drop_duplicates('email').dropna(subset=['name','email','department'])
+        try:
+            df = pd.read_csv(file).drop_duplicates('email').dropna(subset=['name','email','department'])
+        except Exception as e:
+            return Response({'error': f'Failed to parse CSV file: {str(e)}'}, status=400)
+
         created, errors = [], []
         for _, row in df.iterrows():
+            email_val = str(row['email']).strip()
+            name_val  = str(row['name']).strip()
+            dept_val  = str(row['department']).strip()
+            desig_val = str(row.get('designation', '')).strip() if pd.notna(row.get('designation')) else ''
+
             try:
-                if User.objects.filter(email__iexact=row['email']).exists():
-                    errors.append({'email': row['email'], 'error': 'Email exists.'}); continue
-                dept = Department.objects.get(name=row['department'], university=university)
-                user = create_user(row['email'], row['name'], 'faculty', university)
-                FacultyProfile.objects.create(user=user, university=university, department=dept, designation=row.get('designation',''))
-                created.append(row['email'])
+                if User.objects.filter(email__iexact=email_val).exists():
+                    errors.append({'email': email_val, 'error': 'Email already exists.'})
+                    continue
+
+                dept = None
+                if dept_val.isdigit():
+                    dept = Department.objects.filter(id=int(dept_val), university=university).first()
+                if not dept:
+                    dept = Department.objects.filter(name__iexact=dept_val, university=university).first()
+                if not dept:
+                    errors.append({'email': email_val, 'error': f"Department '{dept_val}' not found."})
+                    continue
+
+                user = create_user(email_val, name_val, 'faculty', university)
+                FacultyProfile.objects.create(
+                    user=user, university=university, department=dept, designation=desig_val
+                )
+                created.append(email_val)
             except Exception as e:
-                errors.append({'email': row.get('email'), 'error': str(e)})
-        return Response({'created': created, 'errors': errors}, status=201)
+                errors.append({'email': email_val, 'error': str(e)})
+
+        if not created:
+            errMsg = errors[0]['error'] if errors else 'No valid faculty records found in file.'
+            return Response({
+                'error': f'Bulk upload failed: {errMsg}',
+                'created': created,
+                'errors': errors
+            }, status=400)
+
+        msg = f"Bulk upload completed: {len(created)} faculty member(s) created successfully."
+        if errors:
+            msg += f" ({len(errors)} failed)."
+
+        return Response({
+            'message': msg,
+            'created': created,
+            'errors': errors
+        }, status=201)
 
 
 # ─── Parents ──────────────────────────────────────────────────────────────────
@@ -187,7 +296,7 @@ class ParentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def get_queryset(self):
-        return ParentProfile.objects.filter(university=self.request.user.university)
+        return ParentProfile.objects.filter(university=self.request.user.university, user__is_active=True)
 
     def create(self, request):
         data       = request.data
@@ -205,14 +314,15 @@ class ParentViewSet(viewsets.ModelViewSet):
                 student.parent = profile
                 student.save()
             except StudentProfile.DoesNotExist:
-                pass  # Parent created but not linked; admin can link later
+                pass
 
         return Response(ParentSerializer(profile).data, status=201)
 
     def destroy(self, request, pk=None):
         profile = self.get_object()
-        profile.user.is_active = False
-        profile.user.save()
+        user = profile.user
+        profile.delete()
+        user.delete()
         return Response(status=204)
 
     @action(detail=True, methods=['get'])
@@ -224,24 +334,51 @@ class ParentViewSet(viewsets.ModelViewSet):
     def bulk_upload(self, request):
         file = request.FILES.get('file')
         if not file:
-            return Response({'error': 'No file.'}, status=400)
+            return Response({'error': 'No file uploaded.'}, status=400)
         university = request.user.university
-        df = pd.read_csv(file).drop_duplicates('email').dropna(subset=['name','email'])
+        try:
+            df = pd.read_csv(file).drop_duplicates('email').dropna(subset=['name','email'])
+        except Exception as e:
+            return Response({'error': f'Failed to parse CSV file: {str(e)}'}, status=400)
+
         created, errors = [], []
         for _, row in df.iterrows():
+            email_val = str(row['email']).strip()
+            name_val  = str(row['name']).strip()
+            roll_val  = str(row.get('student_roll_no', '')).strip() if pd.notna(row.get('student_roll_no')) else ''
+
             try:
-                if User.objects.filter(email__iexact=row['email']).exists():
-                    errors.append({'email': row['email'], 'error': 'Email exists.'}); continue
-                user    = create_user(row['email'], row['name'], 'parent', university)
+                if User.objects.filter(email__iexact=email_val).exists():
+                    errors.append({'email': email_val, 'error': 'Email already exists.'})
+                    continue
+
+                user    = create_user(email_val, name_val, 'parent', university)
                 profile = ParentProfile.objects.create(user=user, university=university)
-                roll_no = row.get('student_roll_no')
-                if pd.notna(roll_no):
+                if roll_val:
                     try:
-                        s = StudentProfile.objects.get(university=university, roll_no=roll_no)
-                        s.parent = profile; s.save()
+                        s = StudentProfile.objects.get(university=university, roll_no=roll_val)
+                        s.parent = profile
+                        s.save()
                     except StudentProfile.DoesNotExist:
                         pass
-                created.append(row['email'])
+                created.append(email_val)
             except Exception as e:
-                errors.append({'email': row.get('email'), 'error': str(e)})
-        return Response({'created': created, 'errors': errors}, status=201)
+                errors.append({'email': email_val, 'error': str(e)})
+
+        if not created:
+            errMsg = errors[0]['error'] if errors else 'No valid parent records found in file.'
+            return Response({
+                'error': f'Bulk upload failed: {errMsg}',
+                'created': created,
+                'errors': errors
+            }, status=400)
+
+        msg = f"Bulk upload completed: {len(created)} parent(s) created successfully."
+        if errors:
+            msg += f" ({len(errors)} failed)."
+
+        return Response({
+            'message': msg,
+            'created': created,
+            'errors': errors
+        }, status=201)

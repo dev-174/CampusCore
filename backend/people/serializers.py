@@ -12,7 +12,9 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model  = StudentProfile
         fields = ['id', 'name', 'email', 'is_verified', 'roll_no',
-                  'department', 'department_name', 'batch', 'batch_name', 'parent']
+                  'department', 'department_name', 'batch', 'batch_name', 'parent',
+                  'admission_year', 'enrollment_number']
+        read_only_fields = ['enrollment_number']
 
 
 class FacultySerializer(serializers.ModelSerializer):
@@ -49,7 +51,8 @@ class StudentPreviewSerializer(serializers.ModelSerializer):
     class Meta:
         model  = StudentProfile
         fields = ['id', 'name', 'email', 'is_verified', 'roll_no',
-                  'department_name', 'batch_name', 'phone_number', 'profile_photo']
+                  'department_name', 'batch_name', 'phone_number', 'profile_photo',
+                  'admission_year', 'enrollment_number']
 
 
 class FacultyPreviewSerializer(serializers.ModelSerializer):

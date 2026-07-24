@@ -13,6 +13,19 @@ class University(models.Model):
     code       = models.CharField(max_length=12, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Used as the "CC" segment of student enrollment numbers (see
+    # people.services.generate_enrollment_number). The project currently
+    # only ever runs a single campus, so this defaults to '01', but keeping
+    # it as a real per-university field (instead of a hardcoded constant)
+    # means supporting multiple campuses later is just a matter of giving
+    # each University a different code -- no change to the enrollment
+    # number format or generation logic is required.
+    campus_code = models.CharField(
+        max_length=2, default='01', blank=True,
+        help_text="2-digit numeric campus/college code used as the 'CC' "
+                  "segment of student enrollment numbers.",
+    )
+
     def save(self, *args, **kwargs):
         if not self.code:
             code = make_code()
@@ -29,11 +42,48 @@ class Department(models.Model):
     university = models.ForeignKey(University, related_name='departments', on_delete=models.CASCADE)
     name       = models.CharField(max_length=100)
 
+    # Used as the "DD" segment of student enrollment numbers. Each
+    # department configures its own code (e.g. Computer Engineering = '03');
+    # the enrollment number generator never hardcodes department values, it
+    # simply reads whatever is stored here.
+    code = models.CharField(
+        max_length=2, blank=True, default='',
+        help_text="2-digit numeric department code used as the 'DD' segment "
+                   "of student enrollment numbers (e.g. '03').",
+    )
+
     class Meta:
-        unique_together = ('university', 'name')
+        unique_together = [('university', 'name'), ('university', 'code')]
 
     def __str__(self):
         return self.name
+
+
+class EnrollmentSequence(models.Model):
+    """
+    Tracks the last-issued 6-digit serial for one (university, department,
+    admission_year) bucket -- i.e. one "YY CC DD" prefix of the enrollment
+    number format. A single row here backs every student ever admitted to
+    that department, in that year, at that campus.
+
+    Serials are incremented with an atomic ``F('last_serial') + 1`` UPDATE
+    (see people.services._next_serial) rather than by counting existing
+    students, so the sequence is monotonic and safe under concurrent student
+    creation -- two admins creating students for the same department/year at
+    the same instant can never be handed the same serial (and therefore
+    never the same enrollment number), and deleting a student never frees up
+    or reuses its serial.
+    """
+    university     = models.ForeignKey(University, on_delete=models.CASCADE, related_name='enrollment_sequences')
+    department     = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='enrollment_sequences')
+    admission_year = models.PositiveIntegerField()
+    last_serial    = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('university', 'department', 'admission_year')
+
+    def __str__(self):
+        return f"{self.university.code}/{self.department.code}/{self.admission_year} -> {self.last_serial:06d}"
 
 
 class Batch(models.Model):

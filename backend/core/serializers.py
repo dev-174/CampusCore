@@ -5,15 +5,24 @@ from .models import University, Department, Batch, Subject, Exam, TeachingAssign
 class UniversitySerializer(serializers.ModelSerializer):
     class Meta:
         model  = University
-        fields = ['id', 'name', 'code', 'created_at']
+        fields = ['id', 'name', 'code', 'campus_code', 'created_at']
         read_only_fields = ['code', 'created_at']
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Department
-        fields = ['id', 'university', 'name']
+        fields = ['id', 'university', 'name', 'code']
         read_only_fields = ['university']
+
+    def validate_code(self, value):
+        value = (value or '').strip()
+        if not (value.isdigit() and len(value) == 2):
+            raise serializers.ValidationError(
+                "Department code must be exactly 2 digits (e.g. '03'), since "
+                "it is embedded directly into student enrollment numbers."
+            )
+        return value
 
 
 class BatchSerializer(serializers.ModelSerializer):
