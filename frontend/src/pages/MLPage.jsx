@@ -97,6 +97,7 @@ export default function MLPage() {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Enrollment No</th>
                   <th>Roll No</th>
                   <th>Name</th>
                   <th>Avg Marks %</th>
@@ -107,7 +108,7 @@ export default function MLPage() {
               <tbody>
                 {atRisk.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <div className="empty">
                         <div className="empty-icon">✅</div>
                         <p>No at-risk students detected.</p>
@@ -117,6 +118,9 @@ export default function MLPage() {
                 ) : atRisk.map((s, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
+                    <td style={{ color: s.enrollment_number ? 'var(--text-1)' : 'var(--text-3)', fontStyle: s.enrollment_number ? 'normal' : 'italic' }}>
+                      {s.enrollment_number && String(s.enrollment_number).trim() ? s.enrollment_number : 'Not Assigned'}
+                    </td>
                     <td>{s.roll_no}</td>
                     <td>{s.name}</td>
                     {/* Backend keys: avg_marks_%, attendance_%, risk_% */}
@@ -136,6 +140,7 @@ export default function MLPage() {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Enrollment No</th>
                   <th>Roll No</th>
                   <th>Name</th>
                   <th>Attendance %</th>
@@ -146,7 +151,7 @@ export default function MLPage() {
               <tbody>
                 {predictions.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <div className="empty">
                         <div className="empty-icon">🔮</div>
                         <p>No predictions available.</p>
@@ -156,6 +161,9 @@ export default function MLPage() {
                 ) : predictions.map((p, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
+                    <td style={{ color: p.enrollment_number ? 'var(--text-1)' : 'var(--text-3)', fontStyle: p.enrollment_number ? 'normal' : 'italic' }}>
+                      {p.enrollment_number && String(p.enrollment_number).trim() ? p.enrollment_number : 'Not Assigned'}
+                    </td>
                     <td>{p.roll_no}</td>
                     <td>{p.name}</td>
                     {/* Backend keys: attendance_%, avg_marks_%, predicted_% */}

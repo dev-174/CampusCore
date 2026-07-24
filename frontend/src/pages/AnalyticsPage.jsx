@@ -132,6 +132,7 @@ export default function AnalyticsPage() {
               <thead>
                 <tr>
                   <th>#</th>
+                  <th>Enrollment No</th>
                   <th>Roll No</th>
                   <th>Name</th>
                   <th>Avg %</th>
@@ -140,7 +141,7 @@ export default function AnalyticsPage() {
               <tbody>
                 {outliers.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <div className="empty">
                         <div className="empty-icon">🔍</div>
                         <p>No outliers detected.</p>
@@ -150,6 +151,9 @@ export default function AnalyticsPage() {
                 ) : outliers.map((o, i) => (
                   <tr key={i}>
                     <td>{i + 1}</td>
+                    <td style={{ color: o.enrollment_number ? 'var(--text-1)' : 'var(--text-3)', fontStyle: o.enrollment_number ? 'normal' : 'italic' }}>
+                      {o.enrollment_number && String(o.enrollment_number).trim() ? o.enrollment_number : 'Not Assigned'}
+                    </td>
                     <td>{o.roll_no}</td>
                     <td>{o.name}</td>
                     {/* Backend key: avg_% */}

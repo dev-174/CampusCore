@@ -173,9 +173,11 @@ export default function QuickPreviewModal({ isOpen, onClose, personId, role }) {
                       <span style={{ color: 'var(--text-2)' }}>Roll Number:</span>
                       <span style={{ fontWeight: '500' }}>{displayVal(data.roll_no)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                       <span style={{ color: 'var(--text-2)' }}>Enrollment Number:</span>
-                      <span className="badge badge-gray" style={{ fontSize: '0.65rem', padding: '2px 6px' }}>Not Assigned</span>
+                      <span style={{ fontWeight: '500', color: data.enrollment_number ? 'inherit' : 'var(--text-3)', fontStyle: data.enrollment_number ? 'normal' : 'italic' }}>
+                        {data.enrollment_number && String(data.enrollment_number).trim() ? data.enrollment_number : 'Not Assigned'}
+                      </span>
                     </div>
                   </>
                 )}
@@ -200,7 +202,7 @@ export default function QuickPreviewModal({ isOpen, onClose, personId, role }) {
                           <div key={c.id} style={{ background: 'rgba(0,0,0,0.03)', padding: '6px 10px', borderRadius: '6px', fontSize: '0.78rem' }}>
                             <span style={{ fontWeight: '600', display: 'block' }}>{c.name}</span>
                             <span style={{ color: 'var(--text-2)', fontSize: '0.72rem' }}>
-                              Roll No: {c.roll_no} | {c.department_name} ({c.batch_name})
+                              Enrollment: {c.enrollment_number && String(c.enrollment_number).trim() ? c.enrollment_number : 'Not Assigned'} | Roll No: {c.roll_no} | {c.department_name} ({c.batch_name})
                             </span>
                           </div>
                         ))}

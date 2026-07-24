@@ -98,7 +98,7 @@ export default function ParentsPage() {
       setBulkMsg(res.data?.message || 'Bulk upload successful.');
       fetchAll();
     } catch (e) {
-      setBulkMsg(e.response?.data?.detail || 'Bulk upload failed.');
+      setBulkMsg(e.response?.data?.error || e.response?.data?.detail || 'Bulk upload failed.');
     } finally {
       setBulkLoading(false);
       setBulkFile(null);
@@ -228,7 +228,7 @@ export default function ParentsPage() {
                       <strong>Children:</strong>{' '}
                       {getChildren(p).map((c, ci) => (
                         <span key={ci} className="badge badge-blue" style={{ marginRight: '0.4rem' }}>
-                          {c.name || c.roll_no || c}
+                          {c.name ? `${c.name} (${c.enrollment_number && String(c.enrollment_number).trim() ? c.enrollment_number : 'Not Assigned'})` : (c.enrollment_number || c.roll_no || c)}
                         </span>
                       ))}
                     </td>

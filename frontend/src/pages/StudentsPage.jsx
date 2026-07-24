@@ -87,7 +87,8 @@ export default function StudentsPage() {
     const matchesSearch = (
       (s.name || '').toLowerCase().includes(q) ||
       (s.email || '').toLowerCase().includes(q) ||
-      (s.roll_no || '').toLowerCase().includes(q)
+      (s.roll_no || '').toLowerCase().includes(q) ||
+      (s.enrollment_number || '').toLowerCase().includes(q)
     );
     if (!matchesSearch) return false;
 
@@ -151,7 +152,7 @@ export default function StudentsPage() {
       setBulkMsg(res.data?.message || 'Bulk upload successful.');
       fetchAll();
     } catch (e) {
-      setBulkMsg(e.response?.data?.detail || 'Bulk upload failed.');
+      setBulkMsg(e.response?.data?.error || e.response?.data?.detail || 'Bulk upload failed.');
     } finally {
       setBulkLoading(false);
       setBulkFile(null);
@@ -331,26 +332,27 @@ export default function StudentsPage() {
       </div>
 
       <div className="table-wrap">
-        <table>
+        <table className="students-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Roll No</th>
-              <th>Email</th>
-              <th>Department</th>
-              <th>Batch</th>
-              <th>Status</th>
-              <th>Risk</th>
-              <th>Actions</th>
+              <th className="col-num">#</th>
+              <th className="col-name">Name</th>
+              <th className="col-enroll">Enrollment No</th>
+              <th className="col-roll">Roll No</th>
+              <th className="col-email">Email</th>
+              <th className="col-dept">Department</th>
+              <th className="col-batch">Batch</th>
+              <th className="col-status">Status</th>
+              <th className="col-risk">Risk</th>
+              <th className="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} style={{ textAlign: 'center', padding: '2rem' }}><span className="spinner" /></td></tr>
+              <tr><td colSpan={10} style={{ textAlign: 'center', padding: '2rem' }}><span className="spinner" /></td></tr>
             ) : paginatedStudents.length === 0 ? (
               <tr>
-                <td colSpan={9}>
+                <td colSpan={10}>
                   <div className="empty">
                     <div className="empty-icon">🎓</div>
                     <p>No students found.</p>
@@ -359,8 +361,8 @@ export default function StudentsPage() {
               </tr>
             ) : paginatedStudents.map((s, i) => (
               <tr key={s.id}>
-                <td>{startIndex + i + 1}</td>
-                <td>
+                <td className="col-num" style={{ color: 'var(--text-3)' }}>{startIndex + i + 1}</td>
+                <td className="col-name" title={s.name}>
                   <button
                     onClick={() => setPreviewTarget(s)}
                     style={{
@@ -371,7 +373,12 @@ export default function StudentsPage() {
                       color: 'var(--accent)',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '100%',
+                      display: 'block'
                     }}
                     onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
                     onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
@@ -379,16 +386,25 @@ export default function StudentsPage() {
                     {s.name}
                   </button>
                 </td>
-                <td>{s.roll_no}</td>
-                <td>{s.email}</td>
-                <td>{getDeptName(s.department)}</td>
-                <td>{getBatchName(s.batch)}</td>
-                <td>
+                <td className="col-enroll" title={s.enrollment_number || 'Not Assigned'} style={{ color: s.enrollment_number ? 'var(--text-1)' : 'var(--text-3)', fontStyle: s.enrollment_number ? 'normal' : 'italic', fontWeight: s.enrollment_number ? 500 : 400 }}>
+                  {s.enrollment_number && String(s.enrollment_number).trim() ? s.enrollment_number : 'Not Assigned'}
+                </td>
+                <td className="col-roll" style={{ color: 'var(--text-2)' }}>{s.roll_no}</td>
+                <td className="col-email" title={s.email} style={{ color: 'var(--text-2)' }}>
+                  {s.email}
+                </td>
+                <td className="col-dept" title={getDeptName(s.department)} style={{ fontWeight: 500 }}>
+                  {getDeptName(s.department)}
+                </td>
+                <td className="col-batch">
+                  <span className="badge badge-gray">{getBatchName(s.batch)}</span>
+                </td>
+                <td className="col-status">
                   <span className={`badge ${s.is_verified ? 'badge-green' : 'badge-yellow'}`}>
                     {s.is_verified ? 'Verified' : 'Pending'}
                   </span>
                 </td>
-                <td>
+                <td className="col-risk">
                   {riskMap[s.roll_no] ? (
                     <span className={`badge ${
                       riskMap[s.roll_no].level === 'high' ? 'badge-red' :
@@ -401,7 +417,7 @@ export default function StudentsPage() {
                     <span className="badge badge-gray">—</span>
                   )}
                 </td>
-                <td>
+                <td className="col-actions">
                   <button className="btn btn-danger btn-sm" onClick={() => setDeleteTarget(s)}>
                     Delete
                   </button>

@@ -182,7 +182,9 @@ export default function AddMarksPage() {
               >
                 <option value="">— Select Student —</option>
                 {students.map(s => (
-                  <option key={s.id} value={s.id}>{s.name} ({s.roll_no})</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.enrollment_number ? `Enr: ${s.enrollment_number}` : `Roll: ${s.roll_no}`})
+                  </option>
                 ))}
               </select>
             </div>
@@ -308,6 +310,7 @@ export default function AddMarksPage() {
                     <tr>
                       <th>#</th>
                       <th>Student</th>
+                      <th>Enrollment No</th>
                       <th>Roll No</th>
                       <th>Score</th>
                       <th>Max</th>
@@ -319,6 +322,9 @@ export default function AddMarksPage() {
                       <tr key={m.id}>
                         <td>{i + 1}</td>
                         <td>{m.student_name || getStudentName(m.student)}</td>
+                        <td>
+                          <span className="badge badge-gray">{m.enrollment_number && String(m.enrollment_number).trim() ? m.enrollment_number : 'Not Assigned'}</span>
+                        </td>
                         <td>
                           <span className="badge badge-gray">{m.roll_no || '—'}</span>
                         </td>

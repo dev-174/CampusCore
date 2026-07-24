@@ -105,7 +105,8 @@ export default function ProfilePage() {
           name: res.data.name,
           department: res.data.organization?.department_name ?? null,
           batch: res.data.organization?.batch_name ?? null,
-          roll_no: res.data.organization?.roll_no ?? null
+          roll_no: res.data.organization?.roll_no ?? null,
+          enrollment_number: res.data.organization?.enrollment_number ?? null
         });
       }
     } catch (err) {
@@ -354,7 +355,9 @@ export default function ProfilePage() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ color: 'var(--text-2)', fontSize: '0.85rem' }}>Enrollment Number:</span>
-                    <span className="badge badge-gray" style={{ fontSize: '0.7rem' }}>Coming Soon</span>
+                    <span style={{ fontWeight: '500', fontSize: '0.85rem', color: profile?.organization?.enrollment_number ? 'inherit' : 'var(--text-3)', fontStyle: profile?.organization?.enrollment_number ? 'normal' : 'italic' }}>
+                      {profile?.organization?.enrollment_number && String(profile.organization.enrollment_number).trim() ? profile.organization.enrollment_number : 'Not Assigned'}
+                    </span>
                   </div>
                 </>
               )}
@@ -390,7 +393,7 @@ export default function ProfilePage() {
                         <div key={c.id} style={{ background: 'var(--bg)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
                           <span style={{ fontWeight: '600', display: 'block', fontSize: '0.85rem' }}>{c.name}</span>
                           <span style={{ color: 'var(--text-2)', fontSize: '0.78rem' }}>
-                            Roll No: {c.roll_no} | {c.department_name} ({c.batch_name})
+                            Enrollment: {c.enrollment_number && String(c.enrollment_number).trim() ? c.enrollment_number : 'Not Assigned'} | Roll No: {c.roll_no} | {c.department_name} ({c.batch_name})
                           </span>
                         </div>
                       ))}

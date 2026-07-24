@@ -241,8 +241,9 @@ export default function MarkAttendancePage() {
               <table className="att-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '60px' }}>#</th>
+                    <th style={{ width: '50px' }}>#</th>
                     <th>Student</th>
+                    <th>Enrollment No</th>
                     <th>Roll No</th>
                     <th style={{ textAlign: 'center', width: '100px' }}>Present</th>
                   </tr>
@@ -250,7 +251,7 @@ export default function MarkAttendancePage() {
                 <tbody>
                   {!selectedBatch ? (
                     <tr>
-                      <td colSpan={4}>
+                      <td colSpan={5}>
                         <div className="empty">
                           <div className="empty-icon">🎓</div>
                           <p>Select a subject and batch to load students.</p>
@@ -259,7 +260,7 @@ export default function MarkAttendancePage() {
                     </tr>
                   ) : students.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>
+                      <td colSpan={5}>
                         <div className="empty">
                           <div className="empty-icon">🎓</div>
                           <p>No students found in this batch.</p>
@@ -270,6 +271,9 @@ export default function MarkAttendancePage() {
                     <tr key={s.id}>
                       <td style={{ color: 'var(--text-3)', fontWeight: 500 }}>{i + 1}</td>
                       <td style={{ fontWeight: 600 }}>{s.name}</td>
+                      <td style={{ color: s.enrollment_number ? 'var(--text-2)' : 'var(--text-3)', fontStyle: s.enrollment_number ? 'normal' : 'italic' }}>
+                        {s.enrollment_number && String(s.enrollment_number).trim() ? s.enrollment_number : 'Not Assigned'}
+                      </td>
                       <td style={{ color: 'var(--text-2)' }}>{s.roll_no}</td>
                       <td style={{ textAlign: 'center' }}>
                         <input

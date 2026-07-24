@@ -109,6 +109,7 @@ export default function DashboardPage() {
         const attPct = attendance.data.length ? ((presentCount / attendance.data.length) * 100).toFixed(1) : '0.0';
         setStats({
           roll_no: user.roll_no || 'N/A',
+          enrollment_number: user.enrollment_number && String(user.enrollment_number).trim() ? user.enrollment_number : 'Not Assigned',
           department: user.department || 'N/A',
           batch: user.batch || 'N/A',
           avgMarks,
@@ -266,6 +267,11 @@ export default function DashboardPage() {
             <div className="stat-grid">
               <div className="stat-card">
                 <StatIcon icon={IconIdCard} tint="violet" />
+                <div className="stat-value" style={{ fontSize: stats.enrollment_number !== 'Not Assigned' ? '1.05rem' : '1.3rem' }}>{stats.enrollment_number}</div>
+                <div className="stat-label">Enrollment Number</div>
+              </div>
+              <div className="stat-card">
+                <StatIcon icon={IconIdCard} tint="blue" />
                 <div className="stat-value">{stats.roll_no}</div>
                 <div className="stat-label">Roll Number</div>
               </div>

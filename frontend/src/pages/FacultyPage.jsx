@@ -95,7 +95,7 @@ export default function FacultyPage() {
       setBulkMsg(res.data?.message || 'Bulk upload successful.');
       fetchAll();
     } catch (e) {
-      setBulkMsg(e.response?.data?.detail || 'Bulk upload failed.');
+      setBulkMsg(e.response?.data?.error || e.response?.data?.detail || 'Bulk upload failed.');
     } finally {
       setBulkLoading(false);
       setBulkFile(null);

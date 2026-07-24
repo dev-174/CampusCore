@@ -22,9 +22,10 @@ export function AuthProvider({ children }) {
       university_id:   res.data.university_id,
       university_code: res.data.university_code,
       // Profile fields (populated for student / faculty; undefined for others)
-      department:      res.data.department  ?? null,
-      batch:           res.data.batch       ?? null,
-      roll_no:         res.data.roll_no     ?? null,
+      department:        res.data.department        ?? null,
+      batch:             res.data.batch             ?? null,
+      roll_no:           res.data.roll_no           ?? null,
+      enrollment_number: res.data.enrollment_number ?? null,
     };
     localStorage.setItem('user', JSON.stringify(u));
     setUser(u);

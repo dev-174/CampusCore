@@ -266,11 +266,13 @@ a { color: inherit; text-decoration: none; }
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 100%;
+  width: calc(100% - var(--sidebar-w));
+  min-width: 0;
 }
 .page-container {
   padding: 32px 40px 48px;
   flex: 1;
+  min-width: 0;
 }
 
 /* ── Cards ─────────────────────────────────────────────── */
@@ -485,34 +487,68 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 0.8;
 }
 
-/* ── Table ──────────────────────────────────────────────── */
 .table-wrap {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
   margin-top: 10px;
+  overflow: hidden;
 }
+
 table { width: 100%; border-collapse: collapse; }
 thead tr { background: var(--bg); }
 th {
-  padding: 13px 20px;
+  padding: 11px 12px;
   text-align: left;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-2);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 15px 20px;
-  font-size: 0.875rem;
+  padding: 11px 12px;
+  font-size: 0.85rem;
   color: var(--text);
   border-top: 1px solid var(--border-light);
 }
 tbody tr:hover { background: var(--bg); }
+
+/* ── Students Fixed Layout Table ──────────────────────── */
+.students-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.students-table th,
+.students-table td {
+  padding: 10px 10px;
+  font-size: 0.825rem;
+  vertical-align: middle;
+}
+
+.students-table .col-num     { width: 3.5%; text-align: center; }
+.students-table .col-name    { width: 15%; }
+.students-table .col-enroll  { width: 13%; }
+.students-table .col-roll    { width: 9%; }
+.students-table .col-email   { width: 18%; }
+.students-table .col-dept    { width: 17%; }
+.students-table .col-batch   { width: 8%; text-align: center; }
+.students-table .col-status  { width: 8%; text-align: center; }
+.students-table .col-risk    { width: 8.5%; text-align: center; }
+.students-table .col-actions { width: 5%; text-align: center; }
+
+.students-table td.col-name,
+.students-table td.col-enroll,
+.students-table td.col-email,
+.students-table td.col-dept {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* ── Badges ─────────────────────────────────────────────── */
 .badge {
   display: inline-flex;
