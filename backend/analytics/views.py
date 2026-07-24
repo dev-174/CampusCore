@@ -30,14 +30,15 @@ class AttendanceSummaryView(APIView):
     def get(self, request):
         uni = request.user.university
         qs  = Attendance.objects.filter(student__university=uni).values(
-            'student__roll_no', 'student__user__first_name', 'is_present'
+            'student__roll_no', 'student__enrollment_number', 'student__user__first_name', 'is_present'
         )
         df = pd.DataFrame(list(qs))
         if df.empty:
             return Response([])
-        grp = df.groupby(['student__roll_no', 'student__user__first_name'])['is_present']
+        grp = df.groupby(['student__roll_no', 'student__enrollment_number', 'student__user__first_name'])['is_present']
         result = grp.agg(present='sum', total='count').reset_index()
         result['attendance_%'] = ((result['present'] / result['total']) * 100).round(1)
+        result.rename(columns={'student__enrollment_number': 'enrollment_number'}, inplace=True)
         return Response(result.to_dict(orient='records'))
 
 
@@ -48,16 +49,16 @@ class OutliersView(APIView):
     def get(self, request):
         uni = request.user.university
         qs  = Mark.objects.filter(student__university=uni).values(
-            'student__roll_no', 'student__user__first_name', 'score', 'max_score'
+            'student__roll_no', 'student__enrollment_number', 'student__user__first_name', 'score', 'max_score'
         )
         df = pd.DataFrame(list(qs))
         if df.empty:
             return Response([])
         df['pct'] = (df['score'] / df['max_score']) * 100
-        avg = df.groupby(['student__roll_no', 'student__user__first_name'])['pct'].mean()
+        avg = df.groupby(['student__roll_no', 'student__enrollment_number', 'student__user__first_name'])['pct'].mean()
         threshold = avg.mean() - 2 * avg.std()
         outliers  = avg[avg < threshold].reset_index()
-        outliers.columns = ['roll_no', 'name', 'avg_%']
+        outliers.columns = ['roll_no', 'enrollment_number', 'name', 'avg_%']
         outliers['avg_%'] = outliers['avg_%'].round(1)
         return Response(outliers.to_dict(orient='records'))
 

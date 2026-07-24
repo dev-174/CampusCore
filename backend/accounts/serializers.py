@@ -99,7 +99,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                     'department_name': prof.department.name if prof.department else None,
                     'batch_name': prof.batch.name if prof.batch else None,
                     'roll_no': prof.roll_no,
-                    'enrollment_no': 'Coming Soon'
+                    'enrollment_number': prof.enrollment_number
                 }
             except StudentProfile.DoesNotExist:
                 return None
@@ -133,6 +133,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
                         'id': child.id,
                         'name': child.user.get_full_name() or child.user.username,
                         'roll_no': child.roll_no,
+                        'enrollment_number': child.enrollment_number,
                         'email': child.user.email,
                         'department_name': child.department.name if child.department else None,
                         'batch_name': child.batch.name if child.batch else None

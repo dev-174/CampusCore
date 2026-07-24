@@ -78,6 +78,7 @@ def build_training_rows(university):
 
         rows.append({
             'roll_no': s.roll_no,
+            'enrollment_number': s.enrollment_number,
             'name': s.user.get_full_name() or s.user.email,
             'avg_marks_%': round(sum(hist_pcts) / len(hist_pcts), 2),
             'trend_slope': _trend_slope(hist_pcts),
@@ -102,6 +103,7 @@ def build_current_features(university):
             continue
         rows.append({
             'roll_no': s.roll_no,
+            'enrollment_number': s.enrollment_number,
             'name': s.user.get_full_name() or s.user.email,
             'avg_marks_%': round(sum(pcts) / len(pcts), 2),
             'trend_slope': _trend_slope(pcts),
@@ -215,7 +217,7 @@ class AtRiskView(APIView):
 
         at_risk = (
             current_df[current_df['predicted_risk'] == 1]
-            [['roll_no', 'name', 'avg_marks_%', 'trend_slope', 'attendance_%', 'risk_%']]
+            [['roll_no', 'enrollment_number', 'name', 'avg_marks_%', 'trend_slope', 'attendance_%', 'risk_%']]
             .sort_values('risk_%', ascending=False)
             .to_dict(orient='records')
         )
@@ -307,6 +309,7 @@ class MyAlertsView(APIView):
             'id': a.id,
             'student_name': a.student.user.get_full_name() or a.student.user.email,
             'roll_no': a.student.roll_no,
+            'enrollment_number': a.student.enrollment_number,
             'risk_percent': a.risk_percent,
             'message': a.message,
             'created_at': a.created_at,
@@ -351,5 +354,5 @@ class PredictScoreView(APIView):
         return Response({
             'r2_score': round(r2_score(y, y_pred), 4),
             'mae': round(mean_absolute_error(y, y_pred), 2),
-            'predictions': df[['roll_no', 'name', 'attendance_%', 'avg_marks_%', 'predicted_%']].to_dict(orient='records'),
+            'predictions': df[['roll_no', 'enrollment_number', 'name', 'attendance_%', 'avg_marks_%', 'predicted_%']].to_dict(orient='records'),
         })

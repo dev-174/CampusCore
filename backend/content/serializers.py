@@ -3,15 +3,16 @@ from .models import Mark, Attendance, Notice, Resource
 
 
 class MarkSerializer(serializers.ModelSerializer):
-    student_name  = serializers.CharField(source='student.user.get_full_name', read_only=True)
-    roll_no       = serializers.CharField(source='student.roll_no', read_only=True)
-    subject_name  = serializers.CharField(source='subject.name', read_only=True)
-    exam_title    = serializers.CharField(source='exam.title', read_only=True)
-    percentage    = serializers.SerializerMethodField()
+    student_name      = serializers.CharField(source='student.user.get_full_name', read_only=True)
+    roll_no           = serializers.CharField(source='student.roll_no', read_only=True)
+    enrollment_number = serializers.CharField(source='student.enrollment_number', read_only=True)
+    subject_name      = serializers.CharField(source='subject.name', read_only=True)
+    exam_title        = serializers.CharField(source='exam.title', read_only=True)
+    percentage        = serializers.SerializerMethodField()
 
     class Meta:
         model  = Mark
-        fields = ['id', 'student', 'student_name', 'roll_no',
+        fields = ['id', 'student', 'student_name', 'roll_no', 'enrollment_number',
                   'subject', 'subject_name', 'exam', 'exam_title',
                   'score', 'max_score', 'percentage', 'created_at']
         read_only_fields = ['created_at']
@@ -21,14 +22,15 @@ class MarkSerializer(serializers.ModelSerializer):
 
 
 class AttendanceSerializer(serializers.ModelSerializer):
-    student_name = serializers.CharField(source='student.user.get_full_name', read_only=True)
-    roll_no      = serializers.CharField(source='student.roll_no', read_only=True)
-    subject_name = serializers.CharField(source='subject.name', read_only=True)
-    batch_name   = serializers.CharField(source='student.batch.name', read_only=True)
+    student_name      = serializers.CharField(source='student.user.get_full_name', read_only=True)
+    roll_no           = serializers.CharField(source='student.roll_no', read_only=True)
+    enrollment_number = serializers.CharField(source='student.enrollment_number', read_only=True)
+    subject_name      = serializers.CharField(source='subject.name', read_only=True)
+    batch_name        = serializers.CharField(source='student.batch.name', read_only=True)
 
     class Meta:
         model  = Attendance
-        fields = ['id', 'student', 'student_name', 'roll_no',
+        fields = ['id', 'student', 'student_name', 'roll_no', 'enrollment_number',
                   'subject', 'subject_name', 'batch_name', 'date', 'is_present']
 
 

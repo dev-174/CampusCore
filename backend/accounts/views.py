@@ -111,13 +111,15 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         if user.role == 'student':
             try:
                 profile = StudentProfile.objects.select_related('department', 'batch').get(user=user)
-                data['department'] = profile.department.name if profile.department else None
-                data['batch']      = profile.batch.name if profile.batch else None
-                data['roll_no']    = profile.roll_no
+                data['department']        = profile.department.name if profile.department else None
+                data['batch']             = profile.batch.name if profile.batch else None
+                data['roll_no']           = profile.roll_no
+                data['enrollment_number'] = profile.enrollment_number
             except StudentProfile.DoesNotExist:
-                data['department'] = None
-                data['batch']      = None
-                data['roll_no']    = None
+                data['department']        = None
+                data['batch']             = None
+                data['roll_no']           = None
+                data['enrollment_number'] = None
         elif user.role == 'faculty':
             try:
                 profile = FacultyProfile.objects.select_related('department').get(user=user)
