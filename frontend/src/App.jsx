@@ -8,6 +8,7 @@ import LandingPage  from './pages/LandingPage';
 import LoginPage    from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ClaimPage    from './pages/ClaimPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 // Shared (all roles)
 import DashboardPage   from './pages/DashboardPage';
@@ -46,10 +47,11 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* Public */}
-          <Route path="/"         element={<LandingPage />} />
-          <Route path="/login"    element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/claim"    element={<ClaimPage />} />
+          <Route path="/"                element={<LandingPage />} />
+          <Route path="/login"           element={<LoginPage />} />
+          <Route path="/register"        element={<RegisterPage />} />
+          <Route path="/claim"           element={<ClaimPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Protected — shared layout with sidebar */}
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

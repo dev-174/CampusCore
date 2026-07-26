@@ -25,7 +25,7 @@ export default function LoginPage() {
   };
 
   const handleForgotPass = () => {
-    alert('Please contact your university administrator to reset your password.');
+    navigate('/forgot-password');
   };
 
   const handleSSO = () => {
