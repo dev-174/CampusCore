@@ -105,3 +105,8 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Internal Node Email Service Configuration ───────────────────────────────
+EMAIL_SERVICE_URL = os.environ.get('EMAIL_SERVICE_URL', 'http://localhost:5000/send-email')
+EMAIL_SERVICE_SECRET = os.environ.get('EMAIL_SERVICE_SECRET', '8f2c91e4d7ab53c8f6a12b9d4e77c501')
+

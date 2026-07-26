@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -26,3 +27,21 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_resets')
+    email = models.EmailField(db_index=True)
+    otp_hash = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.IntegerField(default=0)
+    is_used = models.BooleanField(default=False)
+    last_sent_at = models.DateTimeField(auto_now=True)
+
+    def is_valid(self):
+        return not self.is_used and timezone.now() <= self.expires_at and self.attempts < 5
+
+    def __str__(self):
+        return f"OTP for {self.email} (used={self.is_used})"
+
