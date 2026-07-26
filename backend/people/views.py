@@ -77,10 +77,15 @@ class StudentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid department or batch.'}, status=400)
         if User.objects.filter(email__iexact=data['email']).exists():
             return Response({'error': 'Email already in use.'}, status=400)
-        try:
-            admission_year = int(data['admission_year'])
-        except (KeyError, TypeError, ValueError):
-            return Response({'error': 'admission_year (e.g. 2024) is required.'}, status=400)
+        adm_year_val = data.get('admission_year')
+        if adm_year_val is not None and str(adm_year_val).strip() != '':
+            try:
+                admission_year = int(adm_year_val)
+            except (TypeError, ValueError):
+                return Response({'error': 'Invalid admission_year format.'}, status=400)
+        else:
+            from django.utils import timezone
+            admission_year = timezone.now().year
 
         # NOTE: the frontend must never send an enrollment_number -- it is
         # always generated server-side in StudentProfile.save().
@@ -153,11 +158,16 @@ class StudentViewSet(viewsets.ModelViewSet):
                     errors.append({'email': email_val, 'error': f"Batch '{batch_val}' not found for department '{dept.name}'."})
                     continue
 
-                try:
-                    admission_year_val = int(str(row['admission_year']).strip())
-                except (TypeError, ValueError):
-                    errors.append({'email': email_val, 'error': f"Invalid admission_year '{row['admission_year']}'."})
-                    continue
+                raw_adm = row.get('admission_year') if ('admission_year' in row and pd.notna(row.get('admission_year'))) else None
+                if raw_adm is not None and str(raw_adm).strip() != '':
+                    try:
+                        admission_year_val = int(str(raw_adm).strip())
+                    except (TypeError, ValueError):
+                        errors.append({'email': email_val, 'error': f"Invalid admission_year '{raw_adm}'."})
+                        continue
+                else:
+                    from django.utils import timezone
+                    admission_year_val = timezone.now().year
 
                 user = create_user(email_val, name_val, 'student', university)
                 try:
