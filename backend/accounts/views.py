@@ -115,6 +115,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         data['name']            = user.first_name or user.username
         data['university_id']   = user.university_id
         data['university_code'] = user.university.code if user.university else None
+        data['university_name'] = user.university.name if user.university else None
         data['is_verified']     = user.is_verified
 
         # Attach profile-specific fields so the frontend never shows N/A

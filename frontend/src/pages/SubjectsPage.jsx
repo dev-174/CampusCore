@@ -197,7 +197,7 @@ export default function SubjectsPage() {
             ) : subjects.map((s, i) => (
               <tr key={s.id}>
                 <td>{i + 1}</td>
-                <td><span className="badge badge-blue">{s.code || '—'}</span></td>
+                <td>{s.code || '—'}</td>
                 <td>{s.name}</td>
                 <td>{getDeptName(s.department)}</td>
                 <td>

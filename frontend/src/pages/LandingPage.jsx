@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import logoImg from '../assets/logo.jfif';
 
 const features = [
   { icon: '🏛️', title: 'Student registry', desc: 'A centralized registry for student profiles, academic histories, admissions and personal records.' },
@@ -70,7 +71,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="landing-nav-logo">
-          <div className="landing-logo-badge">CC</div>
+          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
           <span>CampusCore</span>
         </div>
         <div className="landing-nav-links">
@@ -127,13 +128,8 @@ export default function LandingPage() {
               <div className="emblem-ring ring-3" />
               <div className="emblem-ring ring-2" />
               <div className="emblem-ring ring-1" />
-              <div className="emblem-icon-box">
-                <svg className="emblem-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M32 12L4 26L32 40L60 26L32 12Z" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M14 31V45C14 45 21 52 32 52C43 52 50 45 50 45V31" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M54 28V43" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round"/>
-                  <circle cx="54" cy="45" r="2.5" fill="#6366f1"/>
-                </svg>
+              <div className="emblem-icon-box" style={{ width: '100px', height: '100px' }}>
+                <img src={logoImg} alt="CampusCore Logo" style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover' }} />
               </div>
             </div>
 
@@ -287,7 +283,7 @@ export default function LandingPage() {
         <div className="landing-footer-grid">
           <div className="landing-footer-brand">
             <div className="landing-footer-logo">
-              <span style={{ fontSize: '1.6rem' }}>🎓</span>
+              <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
               <span>CampusCore</span>
             </div>
             <div className="landing-footer-tagline">Building the Future of Education</div>

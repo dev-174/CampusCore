@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { IconEye, IconEyeOff } from '../components/Icons';
+import logoImg from '../assets/logo.jfif';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function LoginPage() {
       {/* Left panel - SaaS Product Presentation */}
       <div className="auth-left-panel">
         <div className="auth-left-logo" onClick={() => navigate('/')}>
-          <div className="landing-logo-badge">CC</div>
+          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
           <span>CampusCore</span>
         </div>
 
@@ -100,7 +101,7 @@ export default function LoginPage() {
               Back to website
             </button>
             <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-              New here? <Link to="/register" style={{ color: '#6366f1', fontWeight: 600 }}>Create account</Link>
+              New here? <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600 }}>Create account</Link>
             </span>
           </div>
 
@@ -147,7 +148,7 @@ export default function LoginPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#6366f1',
+                      color: 'var(--accent)',
                       fontSize: '0.8rem',
                       fontWeight: 600,
                       cursor: 'pointer',

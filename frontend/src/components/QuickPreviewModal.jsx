@@ -253,10 +253,10 @@ export default function QuickPreviewModal({ isOpen, onClose, personId, role, onU
                     />
                   ) : (
                     <div style={{
-                      width: '52px', height: '52px', borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      width: '48px', height: '48px', borderRadius: '6px',
+                      background: 'var(--accent)',
                       color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '1.2rem', fontWeight: 700
+                      fontSize: '1.1rem', fontWeight: 700
                     }}>
                       {initials(data.name)}
                     </div>
@@ -523,13 +523,13 @@ export default function QuickPreviewModal({ isOpen, onClose, personId, role, onU
                       type="button"
                       className="btn btn-ghost"
                       style={{
-                        borderRadius: '8px',
+                        borderRadius: '6px',
                         padding: '7px 14px',
                         fontSize: '0.85rem',
                         fontWeight: 600,
-                        color: '#4f46e5',
-                        border: '1px solid #e0e7ff',
-                        background: '#eff6ff'
+                        color: 'var(--accent)',
+                        border: '1px solid var(--accent-soft-border)',
+                        background: 'var(--accent-soft)'
                       }}
                       onClick={handleStartEdit}
                     >

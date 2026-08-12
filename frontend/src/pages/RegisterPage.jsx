@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { IconEye, IconEyeOff } from '../components/Icons';
+import logoImg from '../assets/logo.jfif';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ export default function RegisterPage() {
       {/* Left panel - SaaS Product Presentation */}
       <div className="auth-left-panel">
         <div className="auth-left-logo" onClick={() => navigate('/')}>
-          <div className="landing-logo-badge">CC</div>
+          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
           <span>CampusCore</span>
         </div>
 
@@ -146,7 +147,7 @@ export default function RegisterPage() {
               Back to website
             </button>
             <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-              Already registered? <Link to="/login" style={{ color: '#6366f1', fontWeight: 600 }}>Sign in</Link>
+              Already registered? <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign in</Link>
             </span>
           </div>
 

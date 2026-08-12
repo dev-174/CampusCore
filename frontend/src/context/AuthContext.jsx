@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
       role:            res.data.role,
       university_id:   res.data.university_id,
       university_code: res.data.university_code,
+      university_name: res.data.university_name,
       // Profile fields (populated for student / faculty; undefined for others)
       department:        res.data.department        ?? null,
       batch:             res.data.batch             ?? null,

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { IconEye, IconEyeOff } from '../components/Icons';
+import logoImg from '../assets/logo.jfif';
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();
@@ -217,7 +218,7 @@ export default function ForgotPasswordPage() {
       {/* Left panel - SaaS Product Presentation */}
       <div className="auth-left-panel">
         <div className="auth-left-logo" onClick={() => navigate('/')}>
-          <div className="landing-logo-badge">CC</div>
+          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
           <span>CampusCore</span>
         </div>
 
@@ -281,7 +282,7 @@ export default function ForgotPasswordPage() {
               Back to login
             </button>
             <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-              Remember password? <Link to="/login" style={{ color: '#6366f1', fontWeight: 600 }}>Sign in</Link>
+              Remember password? <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign in</Link>
             </span>
           </div>
 
@@ -296,7 +297,7 @@ export default function ForgotPasswordPage() {
                       flex: 1,
                       height: '4px',
                       borderRadius: '2px',
-                      background: s <= step ? 'linear-gradient(90deg, #6366f1, #8b5cf6)' : '#e2e8f0',
+                      background: s <= step ? 'linear-gradient(90deg, #0f766e, #0d9488)' : '#e2e8f0',
                       transition: 'background 0.3s ease',
                     }}
                   />
@@ -429,7 +430,7 @@ export default function ForgotPasswordPage() {
                             fontSize: '1.4rem',
                             fontWeight: 700,
                             borderRadius: '10px',
-                            border: digit ? '2px solid #6366f1' : '1px solid #cbd5e1',
+                            border: digit ? '2px solid var(--accent)' : '1px solid #cbd5e1',
                             background: '#f8fafc',
                             color: '#0f172a',
                             outline: 'none',
@@ -484,7 +485,7 @@ export default function ForgotPasswordPage() {
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: resendCooldown > 0 ? '#94a3b8' : '#6366f1',
+                        color: resendCooldown > 0 ? '#94a3b8' : 'var(--accent)',
                         fontWeight: 600,
                         cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
                         padding: 0,
