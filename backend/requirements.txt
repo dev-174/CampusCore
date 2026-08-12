@@ -5,3 +5,7 @@ django-cors-headers
 pandas
 scikit-learn
 reportlab
+gunicorn #runs Django on Render
+psycopg[binary] #lets Django connect to PostgreSQL
+dj-database-url
+python-dotenv
