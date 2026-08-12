@@ -85,11 +85,10 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    os.environ.get('FRONTEND_URL', 'https://campuscore-phi.vercel.app'),
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://campuscore-phi.vercel.app",
 ]
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
