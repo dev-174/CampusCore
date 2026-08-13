@@ -1,11 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'https://campuscore-backend-12hk.onrender.com/api/',
+  baseURL: "https://campuscore-backend-12hk.onrender.com/api/",
 });
 // Attach JWT access token to every request
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('access');
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -23,18 +23,18 @@ function processQueue(error, token = null) {
 }
 
 api.interceptors.response.use(
-  res => res,
-  async err => {
+  (res) => res,
+  async (err) => {
     const original = err.config;
 
     // Only attempt refresh on 401, and only once per request
     if (err.response?.status === 401 && !original._retry) {
-      const refreshToken = localStorage.getItem('refresh');
+      const refreshToken = localStorage.getItem("refresh");
 
       // No refresh token stored → force logout immediately
       if (!refreshToken) {
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = "/login";
         return Promise.reject(err);
       }
 
@@ -42,7 +42,7 @@ api.interceptors.response.use(
         // Another request is already refreshing — queue this one
         return new Promise((resolve, reject) => {
           refreshQueue.push({ resolve, reject });
-        }).then(token => {
+        }).then((token) => {
           original.headers.Authorization = `Bearer ${token}`;
           return api(original);
         });
@@ -53,11 +53,11 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          'http://localhost:8000/api/auth/token/refresh/',
+          "https://campuscore-backend-12hk.onrender.com/api/auth/token/refresh/",
           { refresh: refreshToken },
         );
         const newAccess = data.access;
-        localStorage.setItem('access', newAccess);
+        localStorage.setItem("access", newAccess);
         api.defaults.headers.common.Authorization = `Bearer ${newAccess}`;
         processQueue(null, newAccess);
         original.headers.Authorization = `Bearer ${newAccess}`;
@@ -65,7 +65,7 @@ api.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = "/login";
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
