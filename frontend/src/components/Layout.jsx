@@ -136,7 +136,9 @@ export default function Layout() {
       )}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-logo">
-          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          <div className="brand-logo-wrapper">
+            <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          </div>
           <span className="brand-name">CampusCore</span>
           <button
             className="sidebar-close-btn"

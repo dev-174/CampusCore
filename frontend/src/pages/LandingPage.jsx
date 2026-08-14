@@ -71,7 +71,9 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="landing-nav-logo">
-          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          <div className="brand-logo-wrapper">
+            <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          </div>
           <span>CampusCore</span>
         </div>
         <div className="landing-nav-links">
@@ -128,8 +130,8 @@ export default function LandingPage() {
               <div className="emblem-ring ring-3" />
               <div className="emblem-ring ring-2" />
               <div className="emblem-ring ring-1" />
-              <div className="emblem-icon-box" style={{ width: '100px', height: '100px' }}>
-                <img src={logoImg} alt="CampusCore Logo" style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover' }} />
+              <div className="emblem-icon-box" style={{ width: '100px', height: '100px', overflow: 'hidden' }}>
+                <img src={logoImg} alt="CampusCore Logo" style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover', transform: 'scale(1.35)' }} />
               </div>
             </div>
 
@@ -283,7 +285,9 @@ export default function LandingPage() {
         <div className="landing-footer-grid">
           <div className="landing-footer-brand">
             <div className="landing-footer-logo">
-              <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+              <div className="brand-logo-wrapper">
+                <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+              </div>
               <span>CampusCore</span>
             </div>
             <div className="landing-footer-tagline">Building the Future of Education</div>

@@ -218,7 +218,9 @@ export default function ForgotPasswordPage() {
       {/* Left panel - SaaS Product Presentation */}
       <div className="auth-left-panel">
         <div className="auth-left-logo" onClick={() => navigate('/')}>
-          <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          <div className="brand-logo-wrapper">
+            <img src={logoImg} className="brand-logo-img" alt="CampusCore Logo" />
+          </div>
           <span>CampusCore</span>
         </div>
 
